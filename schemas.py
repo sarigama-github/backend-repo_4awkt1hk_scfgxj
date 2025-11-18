@@ -12,37 +12,52 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Pizzeria schemas
 
+class Pizza(BaseModel):
+    """
+    Pizza collection schema
+    Collection name: "pizza"
+    """
+    name: str = Field(..., description="Pizza name")
+    description: Optional[str] = Field(None, description="Short description")
+    price: float = Field(..., ge=0, description="Price in EUR")
+    size: str = Field("33 cm", description="Default size label")
+    vegetarian: bool = Field(False, description="Is vegetarian")
+    spicy: bool = Field(False, description="Is spicy")
+    image: Optional[str] = Field(None, description="Image URL")
+
+class OrderItem(BaseModel):
+    pizza_id: str = Field(..., description="Referenced Pizza document _id as string")
+    name: str = Field(..., description="Pizza name at time of order")
+    price: float = Field(..., ge=0, description="Unit price at time of order")
+    quantity: int = Field(1, ge=1, description="Quantity")
+
+class Order(BaseModel):
+    """
+    Orders collection schema
+    Collection name: "order"
+    """
+    customer_name: str = Field(..., description="Customer full name")
+    phone: str = Field(..., description="Contact phone number")
+    address: str = Field(..., description="Delivery address")
+    items: List[OrderItem] = Field(..., description="Ordered items")
+    note: Optional[str] = Field(None, description="Optional note for the kitchen or courier")
+    total: float = Field(..., ge=0, description="Total amount in EUR")
+
+# Example schemas (kept for reference)
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    name: str
+    email: str
+    address: str
+    age: Optional[int] = None
+    is_active: bool = True
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    title: str
+    description: Optional[str] = None
+    price: float
+    category: str
+    in_stock: bool = True
